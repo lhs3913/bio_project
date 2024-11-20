@@ -1,5 +1,4 @@
 import tkinter as tk
-from tkinter import ttk
 from PIL import Image, ImageTk
 import random
 
@@ -29,7 +28,6 @@ mutation_chances = {
     'Gamma Radiation': 0.7  # 70% chance
 }
 
-
 # Function to randomly choose an animal
 def random_animal():
     global chosen_animal
@@ -56,13 +54,24 @@ def check_for_mutation():
         mutation_occurred = random.random() < mutation_chance
         mutation_label.config(text="Mutation: " + ("Yes" if mutation_occurred else "No"))
 
+        # Show/hide UI elements based on mutation result
+        if mutation_occurred:
+            select_body_part_button.pack(pady=10)
+        else:
+            select_body_part_button.pack_forget()  # Hide button if no mutation
+            # Hide all body part selection and mutation elements if no mutation
+            body_part_label.pack_forget()
+            body_part_mutation_label.pack_forget()
+            select_body_part_mutation_button.pack_forget()
+
 
 # Function to randomly select a body part for mutation
 def select_random_body_part():
     global chosen_body_part
     chosen_body_part = random.choice(body_parts)
     body_part_label.config(text=f"Body Part: {chosen_body_part}")
-    return chosen_body_part  # Return the mutated body part
+    body_part_label.pack(pady=10)  # Show body part label after selection
+    select_body_part_mutation_button.pack(pady=10)  # Show mutation button after body part selection
 
 
 # Function to randomly select a mutation for the chosen body part
@@ -71,6 +80,7 @@ def select_random_body_part_mutation():
     if chosen_body_part:
         chosen_body_part_mutation = random.choice(mutation_by_body_part[chosen_body_part])
         body_part_mutation_label.config(text=f"Mutation: {chosen_body_part_mutation}")
+        body_part_mutation_label.pack(pady=10)  # Show the mutation label after mutation selection
         update_image(chosen_animal, chosen_body_part_mutation)
 
 
@@ -95,12 +105,46 @@ def update_image(animal, mutation):
         print(f"Base image {animal.lower()}.png not found.")
 
 
+# Function to reset all values and hide certain UI elements
+def reset():
+    global chosen_animal, chosen_radiation, mutation_occurred, chosen_body_part, chosen_body_part_mutation
+
+    # Reset all variables
+    chosen_animal = None
+    chosen_radiation = None
+    mutation_occurred = False
+    chosen_body_part = None
+    chosen_body_part_mutation = None
+
+    # Reset labels
+    animal_label.config(text="Animal: ")
+    radiation_label.config(text="Radiation: ")
+    mutation_chance_label.config(text="Mutation Chance: 50%")
+    mutation_label.config(text="Mutation: ")
+    body_part_label.config(text="Body Part: ")
+    body_part_mutation_label.config(text="Mutation: ")
+
+    # Hide body part selection and mutation buttons if no mutation
+    select_body_part_button.pack_forget()
+    body_part_label.pack_forget()
+    body_part_mutation_label.pack_forget()
+    select_body_part_mutation_button.pack_forget()
+
+    # Hide the mutation image
+    image_label.config(image="")
+    image_label.image = None
+
+
 # Create the main window
 root = tk.Tk()
 root.title('Animal Mutation Spinner')
 
 # Set a fixed size for the window
 root.geometry("400x850")
+
+# Add the Reset Button
+reset_button = tk.Button(root, text="Reset", command=reset, font=('Arial', 12))
+reset_button.pack(pady=20)
 
 # Label for showing the animal
 animal_label = tk.Label(root, text="Animal: ", font=('Arial', 12))
@@ -130,31 +174,25 @@ mutation_label.pack(pady=10)
 check_mutation_button = tk.Button(root, text="Check for Mutation", command=check_for_mutation, font=('Arial', 12))
 check_mutation_button.pack(pady=10)
 
-# Label to display the mutation result (if mutation happens)
-result_label = tk.Label(root, text="Mutation Result: ", font=('Arial', 12))
-result_label.pack(pady=10)
-
 # Label for showing the body part to mutate
 body_part_label = tk.Label(root, text="Body Part: ", font=('Arial', 12))
-body_part_label.pack(pady=10)
 
 # Button to select a random body part for mutation
 select_body_part_button = tk.Button(root, text="Select Random Body Part", command=select_random_body_part,
                                     font=('Arial', 12))
-select_body_part_button.pack(pady=10)
 
 # Label to show the body part mutation
 body_part_mutation_label = tk.Label(root, text="Mutation: ", font=('Arial', 12))
-body_part_mutation_label.pack(pady=10)
 
 # Button to select a random mutation for the body part
 select_body_part_mutation_button = tk.Button(root, text="Select Random Body Part Mutation",
                                              command=select_random_body_part_mutation, font=('Arial', 12))
-select_body_part_mutation_button.pack(pady=10)
 
 # Label to display the animal image
 image_label = tk.Label(root)
 image_label.pack(pady=20)
+
+
 
 # Start the Tkinter event loop
 root.mainloop()
